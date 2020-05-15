@@ -1,8 +1,8 @@
 :root {
-  --primary: #39A9DB;
-  --warning: #F9DC5C;
-  --danger: #E84855;
-  --success: #0F9D58;
+  --primary: #39a9db;
+  --warning: #f9dc5c;
+  --danger: #e84855;
+  --success: #1ebf71;
   --white: #fdfdfd;
   --dark: #181717;
 }
@@ -13,13 +13,14 @@
   border-radius: 10px;
   cursor: pointer;
   transition: transform 0.3s ease;
-  top: 50%;
-  left: 50%;
+  /* top: 50%;
+  left: 50%; */
+  margin: 10% auto 3% auto;
 }
 
 .btn:hover {
   /* transform: translateY(-3px); */
-  -webkit-transform: scale(1.05);/*Grows in size like Angry Birds button*/
+  -webkit-transform: scale(1.05); /*Grows in size like Angry Birds button*/
   -moz-transform: scale(1.05);
   -ms-transform: scale(1.05);
   -o-transform: scale(1.05);

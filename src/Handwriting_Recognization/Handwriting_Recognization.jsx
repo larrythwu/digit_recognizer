@@ -3,20 +3,38 @@ import "./Handwriting_Recognization.css";
 import { Button } from "../components/Button.jsx";
 import * as tf from "@tensorflow/tfjs";
 import { MnistData } from "./data";
+import { Icon } from "@iconify/react";
+import tensorflowIcon from "@iconify/icons-logos/tensorflow";
+import { fabric } from "fabric";
 
 let model;
 let data;
-let trainingComplete = false;
 
 //traning constants
 const BATCH_SIZE = 64;
 const TRAIN_BATCHES = 150;
+let canvas;
 
 export default class Handwriting_Recognization extends Component {
+  constructor() {
+    super();
+    this.state = {
+      trainingComplete: false,
+    };
+  }
+
   async componentDidMount() {
+    canvas = new fabric.Canvas("canvas", {
+      backgroundColor: "rgb(0, 0, 0)",
+    });
+    canvas.isDrawingMode = true;
+    canvas.freeDrawingBrush.width = 4;
+    canvas.freeDrawingBrush.color = "rgb(255, 255, 255)";
+
     this.createModel();
     await this.load();
     await this.train();
+    this.clearCanvas();
   }
 
   createModel() {
@@ -108,50 +126,44 @@ export default class Handwriting_Recognization extends Component {
 
       await tf.nextFrame();
     }
-    trainingComplete = true;
+    this.setState({ trainingComplete: true });
     console.log("Training complete");
   }
 
-  async predict(batch) {
-    tf.tidy(() => {
-      const input_value = Array.from(batch.labels.argMax(1).dataSync());
+  async predict() {
+    let canvasElement = canvas.getElement();
 
-      // const div = document.createElement("div");
-      // div.className = "prediction-div";
+    let tensor = tf.browser
+      .fromPixels(canvasElement)
+      .resizeNearestNeighbor([28, 28])
+      .mean(2)
+      .expandDims(2)
+      .expandDims()
+      .toFloat();
 
-      const output = model.predict(batch.xs.reshape([-1, 28, 28, 1]));
+    const out = await model.predict(tensor);
 
-      //extract the highest prob #
-      const prediction_value = Array.from(output.argMax(1).dataSync());
-      // const image = batch.xs.slice([0, 0], [1, batch.xs.shape[1]]);
+    //await this.draw(img.flatten(), canvasElement);
 
-      // const canvas = document.createElement("canvas");
-      // canvas.className = "prediction-canvas";
-      // this.draw(image.flatten(), canvas);
-
-      // const label = document.createElement("div");
-      // label.innerHTML = "Original Value: " + input_value;
-      // label.innerHTML += "<br>Prediction Value: " + prediction_value;
-
-    //   if (prediction_value - input_value == 0) {
-    //     label.innerHTML += "<br>Value recognized successfully";
-    //   } else {
-    //     label.innerHTML += "<br>Recognition failed!";
-    //   }
-    //
-    //   div.appendChild(canvas);
-    //   div.appendChild(label);
-    //   document.getElementById("predictionResult").appendChild(div);
-    // });
+    console.log(out.dataSync());
   }
 
-  draw(image, canvas) {
+  async draw(image, canvas) {
+    console.log("here");
     const [width, height] = [28, 28];
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
     const imageData = new ImageData(width, height);
     const data = image.dataSync();
+
+    // set fill color of context
+    ctx.fillStyle = "red";
+
+    // create rectangle at a 100,100 point, with 20x20 dimensions
+    ctx.fillRect(10, 10, 10, 10);
+    await new Promise((r) => setTimeout(r, 1000));
+
     for (let i = 0; i < height * width; ++i) {
       const j = i * 4;
       imageData.data[j + 0] = data[i] * 255;
@@ -161,7 +173,60 @@ export default class Handwriting_Recognization extends Component {
     }
     ctx.putImageData(imageData, 0, 0);
   }
+
+  clearCanvas() {
+    canvas.clear();
+    canvas.setBackgroundColor("rgb(0, 0, 0)");
+  }
+
   render() {
-    return <></>;
+    let loading_predict;
+    let drawingCanvas;
+    drawingCanvas = (
+      <canvas
+        //className="drawingCanvas"
+        id="canvas"
+        width="100"
+        height="100"
+      ></canvas>
+    );
+    if (!this.state.trainingComplete) {
+      //three dot thing
+      loading_predict = (
+        <div className="loading">
+          <Icon className="icon" icon={tensorflowIcon} />
+          <div className="spinner">
+            <div className="bounce1"></div>
+            <div className="bounce2"></div>
+            <div className="bounce3"></div>
+          </div>
+        </div>
+      );
+    } else {
+      loading_predict = (
+        <Button
+          onClick={async () => await this.predict()}
+          type="button"
+          buttonStyle="btn--success--outline"
+          buttonSize="btn--medium"
+        >
+          Predict Handwriting
+        </Button>
+      );
+    }
+    return (
+      <>
+        {drawingCanvas}
+        {loading_predict}
+        <Button
+          onClick={() => this.clearCanvas()}
+          type="button"
+          buttonStyle="btn--primary--outline"
+          buttonSize="btn--medium"
+        >
+          Clear
+        </Button>
+      </>
+    );
   }
 }
