@@ -6,35 +6,131 @@ import { MnistData } from "./data";
 import { Icon } from "@iconify/react";
 import tensorflowIcon from "@iconify/icons-logos/tensorflow";
 import { fabric } from "fabric";
+import Chart from "react-apexcharts";
 
+///////////Global Variables///////////
 let model;
 let data;
+let canvas;
 
 //traning constants
 const BATCH_SIZE = 64;
 const TRAIN_BATCHES = 150;
-let canvas;
 
 export default class Handwriting_Recognization extends Component {
+  //initiate the bar chart
   constructor() {
     super();
     this.state = {
       trainingComplete: false,
+      series: [
+        {
+          name: "Probability",
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
+      ],
+      options: {
+        chart: {
+          height: 350,
+          type: "bar",
+        },
+        plotOptions: {
+          bar: {
+            dataLabels: {
+              position: "top", // top, center, bottom
+            },
+          },
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val) {
+            return val + "%";
+          },
+          position: "top",
+          offsetY: -20,
+          style: {
+            fontSize: "12px",
+            colors: ["#304758"],
+          },
+        },
+
+        xaxis: {
+          categories: [
+            "Zero",
+            "One",
+            "Two",
+            "Three",
+            "Four",
+            "Five",
+            "Six",
+            "Seven",
+            "Eight",
+            "Nine",
+          ],
+          position: "buttom",
+          axisBorder: {
+            show: true,
+          },
+          axisTicks: {
+            show: false,
+          },
+          crosshairs: {
+            fill: {
+              type: "gradient",
+              gradient: {
+                colorFrom: "#D8E3F0",
+                colorTo: "#BED1E6",
+                stops: [0, 100],
+                opacityFrom: 0.4,
+                opacityTo: 0.5,
+              },
+            },
+          },
+          tooltip: {
+            enabled: true,
+          },
+        },
+
+        yaxis: {
+          axisBorder: {
+            show: true,
+          },
+          axisTicks: {
+            show: false,
+          },
+          labels: {
+            show: false,
+            formatter: function (val) {
+              return val + "%";
+            },
+          },
+        },
+
+        title: {
+          //text: "Monthly Inflation in Argentina, 2002",
+          floating: true,
+          offsetY: 330,
+          align: "center",
+          style: {
+            color: "#000000",
+          },
+        },
+      },
     };
   }
 
+  //create the canvas and train the ML model
   async componentDidMount() {
     canvas = new fabric.Canvas("canvas", {
       backgroundColor: "rgb(0, 0, 0)",
     });
     canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush.width = 4;
+    canvas.freeDrawingBrush.width = 11;
     canvas.freeDrawingBrush.color = "rgb(255, 255, 255)";
 
     this.createModel();
     await this.load();
     await this.train();
-    this.clearCanvas();
   }
 
   createModel() {
@@ -141,60 +237,48 @@ export default class Handwriting_Recognization extends Component {
       .expandDims()
       .toFloat();
 
-    const out = await model.predict(tensor);
+    let out = await model.predict(tensor);
+    out = out.dataSync();
+    console.log(out);
 
-    //await this.draw(img.flatten(), canvasElement);
-
-    console.log(out.dataSync());
-  }
-
-  async draw(image, canvas) {
-    console.log("here");
-    const [width, height] = [28, 28];
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    const imageData = new ImageData(width, height);
-    const data = image.dataSync();
-
-    // set fill color of context
-    ctx.fillStyle = "red";
-
-    // create rectangle at a 100,100 point, with 20x20 dimensions
-    ctx.fillRect(10, 10, 10, 10);
-    await new Promise((r) => setTimeout(r, 1000));
-
-    for (let i = 0; i < height * width; ++i) {
-      const j = i * 4;
-      imageData.data[j + 0] = data[i] * 255;
-      imageData.data[j + 1] = data[i] * 255;
-      imageData.data[j + 2] = data[i] * 255;
-      imageData.data[j + 3] = 255;
+    let N = new Array(10);
+    //round decimal and convert to percentage
+    for (let i = 0; i < 10; i++) {
+      out[i] *= 100;
+      let n = Math.round(out[i] * 100);
+      N[i] = n / 100;
     }
-    ctx.putImageData(imageData, 0, 0);
+
+    this.setState({
+      series: [
+        {
+          name: "Probability",
+          data: N,
+        },
+      ],
+    });
+    console.log(out);
   }
 
   clearCanvas() {
     canvas.clear();
     canvas.setBackgroundColor("rgb(0, 0, 0)");
+    this.setState({
+      series: [
+        {
+          name: "Probability",
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
+      ],
+    });
   }
 
   render() {
     let loading_predict;
-    let drawingCanvas;
-    drawingCanvas = (
-      <canvas
-        //className="drawingCanvas"
-        id="canvas"
-        width="100"
-        height="100"
-      ></canvas>
-    );
     if (!this.state.trainingComplete) {
       //three dot thing
       loading_predict = (
         <div className="loading">
-          <Icon className="icon" icon={tensorflowIcon} />
           <div className="spinner">
             <div className="bounce1"></div>
             <div className="bounce2"></div>
@@ -205,6 +289,7 @@ export default class Handwriting_Recognization extends Component {
     } else {
       loading_predict = (
         <Button
+          className="loading"
           onClick={async () => await this.predict()}
           type="button"
           buttonStyle="btn--success--outline"
@@ -216,17 +301,35 @@ export default class Handwriting_Recognization extends Component {
     }
     return (
       <>
-        {drawingCanvas}
-        {loading_predict}
-        <Button
-          onClick={() => this.clearCanvas()}
-          type="button"
-          buttonStyle="btn--primary--outline"
-          buttonSize="btn--medium"
-        >
-          Clear
-        </Button>
+        <canvas
+          className="drawingCanvas"
+          id="canvas"
+          width="300"
+          height="300"
+        ></canvas>
+        <div className="container1">
+          <Chart
+            className="chart"
+            options={this.state.options}
+            series={this.state.series}
+            type="bar"
+            width="500"
+          />
+        </div>
+        <div className="container2">
+          <Button
+            className="but"
+            onClick={() => this.clearCanvas()}
+            type="button"
+            buttonStyle="btn--primary--outline"
+            buttonSize="btn--medium"
+          >
+            Clear
+          </Button>
+          {loading_predict}
+        </div>
       </>
     );
   }
 }
+// <Icon className="icon" icon={tensorflowIcon} />

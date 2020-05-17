@@ -4,8 +4,30 @@
   color: #ffa800;
 }
 
+.container1 {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.container2 {
+  display: inline-block;
+  margin: 10%;
+}
+.chart {
+  display: inline-block;
+  position: fixed;
+  top: 12%;
+  left: 45%;
+}
+
 .drawingCanvas {
-  margin: 20% 20% 20% 20%;
+  display: inline-block;
+  margin: 40% 150%;
+}
+
+.loading {
+  display: inline-block;
+  width: 212px;
 }
 
 .icon {
