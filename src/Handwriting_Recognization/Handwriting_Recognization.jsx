@@ -301,13 +301,13 @@ export default class Handwriting_Recognization extends Component {
     }
     return (
       <>
-        <canvas
-          className="drawingCanvas"
-          id="canvas"
-          width="300"
-          height="300"
-        ></canvas>
         <div className="container1">
+          <canvas
+            className="drawingCanvas"
+            id="canvas"
+            width="300"
+            height="300"
+          ></canvas>
           <Chart
             className="chart"
             options={this.state.options}
