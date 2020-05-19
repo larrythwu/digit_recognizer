@@ -18,7 +18,7 @@ const BATCH_SIZE = 64;
 const TRAIN_BATCHES = 150;
 
 export default class Handwriting_Recognization extends Component {
-  //initiate the bar chart
+  //initiate the bar graph
   constructor() {
     super();
     this.state = {
@@ -299,6 +299,15 @@ export default class Handwriting_Recognization extends Component {
         </Button>
       );
     }
+    let instruction;
+    if (!this.state.trainingComplete) {
+      instruction = (
+        <p>
+          Please wait for the ML model training to complete, and then write any
+          digit on the canvas then click "Predict Handwritting"
+        </p>
+      );
+    }
     return (
       <>
         <div className="container1">
@@ -328,6 +337,7 @@ export default class Handwriting_Recognization extends Component {
           </Button>
           {loading_predict}
         </div>
+        {instruction}
       </>
     );
   }
