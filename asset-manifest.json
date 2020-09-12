@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/digit_recognizer/static/css/main.9fc82540.chunk.css",
+    "main.js": "/digit_recognizer/static/js/main.ab9c7ea8.chunk.js",
+    "main.js.map": "/digit_recognizer/static/js/main.ab9c7ea8.chunk.js.map",
+    "runtime-main.js": "/digit_recognizer/static/js/runtime-main.9ea5f2a6.js",
+    "runtime-main.js.map": "/digit_recognizer/static/js/runtime-main.9ea5f2a6.js.map",
+    "static/js/2.18b10121.chunk.js": "/digit_recognizer/static/js/2.18b10121.chunk.js",
+    "static/js/2.18b10121.chunk.js.map": "/digit_recognizer/static/js/2.18b10121.chunk.js.map",
+    "index.html": "/digit_recognizer/index.html",
+    "precache-manifest.9c851896841b3b06d895b68ff5cf9997.js": "/digit_recognizer/precache-manifest.9c851896841b3b06d895b68ff5cf9997.js",
+    "service-worker.js": "/digit_recognizer/service-worker.js",
+    "static/css/main.9fc82540.chunk.css.map": "/digit_recognizer/static/css/main.9fc82540.chunk.css.map",
+    "static/js/2.18b10121.chunk.js.LICENSE.txt": "/digit_recognizer/static/js/2.18b10121.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.9ea5f2a6.js",
+    "static/js/2.18b10121.chunk.js",
+    "static/css/main.9fc82540.chunk.css",
+    "static/js/main.ab9c7ea8.chunk.js"
+  ]
+}
